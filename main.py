@@ -48,6 +48,11 @@ def unlock_pdf():
 
         # Return the unlocked PDF
         print("Entró 2")
+        
+        # Encode the unlocked PDF to base64
+        unlocked_pdf_base64 = base64.b64encode(unlocked_pdf_stream.read()).decode('utf-8')
+
+        return jsonify({'pdf': unlocked_pdf_base64})
         return send_file(unlocked_pdf_stream, as_attachment=True, download_name='unlocked.pdf', mimetype='application/pdf')
 
     except Exception as e:
