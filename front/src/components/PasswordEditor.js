@@ -5,8 +5,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import { TextareaAutosize } from '@mui/material';
-
+import { Grid, TextareaAutosize } from '@mui/material';
 
 
 export default function PasswordEditor({ open, handleClose, passwords, handleChangePasswords }) {
@@ -31,12 +30,25 @@ export default function PasswordEditor({ open, handleClose, passwords, handleCha
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            <TextareaAutosize
-                aria-label="textarea"
-                value={passwordString}
-                onChange={(event) => setNewPasswordString(event.target.value)}
-                style={{ width: "20vw", height: "45vh", fontFamily: "Roboto", fontSize: "1em"}}
-            />
+          <Grid
+            container
+            direction="row"
+            justifyContent="center"
+            alignItems="flex-start"
+        >
+            <Grid item xs={6}>
+                <TextareaAutosize
+                    aria-label="textarea"
+                    value={passwordString}
+                    onChange={(event) => setNewPasswordString(event.target.value)}
+                    style={{ width: "20vw", height: "45vh", fontFamily: "Roboto", fontSize: "1em"}}
+                />
+            </Grid>
+            <Grid item xs={6}>
+                <p>{}</p>
+            </Grid>
+            </Grid>
+
           </DialogContentText>
         </DialogContent>
         <DialogActions>

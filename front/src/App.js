@@ -12,6 +12,10 @@ import PasswordIcon from '@mui/icons-material/Password';
 import FileRow from './components/FileRow';
 import PasswordEditor from './components/PasswordEditor';
 
+
+BASE_URL = "http://localhost:3000";
+
+
 const App = () => {
   const [files, setFiles] = useState([]);
   const [open, setOpen] = React.useState(false);
@@ -60,7 +64,7 @@ const App = () => {
     const file = files[index];
 
     try {
-      const response = await fetch('http://localhost:3001/unlock-pdf', {
+      const response = await fetch(`${BASE_URL}/unlock-pdf`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

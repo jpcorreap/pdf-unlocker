@@ -10,9 +10,7 @@ CORS(app)  # Enable CORS for all routes
 
 @app.route('/unlock-pdf', methods=['POST'])
 def unlock_pdf():
-    print("Entró 1")
     try:
-        print("Entró 2")
         pdf_base64 = request.json.get('pdf')
         password = request.json.get('password')
         print(password)
@@ -28,14 +26,14 @@ def unlock_pdf():
 
         # Check if the PDF is encrypted
         if not pdf_reader.is_encrypted:
+            print('PDF is not encrypted')
             return jsonify({'error': 'PDF is not encrypted'}), 400
 
         # Try to decrypt the PDF with the provided password
         if not pdf_reader.decrypt(password):
+            print('Incorrect password')
             return jsonify({'error': 'Incorrect password'}), 400
 
-        print("Ya lo desbloqueó")
-        
         # Create a new PDF writer object to write the unlocked PDF
         pdf_writer = PdfWriter()
         for page_num in range(len(pdf_reader.pages)):
@@ -47,13 +45,11 @@ def unlock_pdf():
         unlocked_pdf_stream.seek(0)
 
         # Return the unlocked PDF
-        print("Entró 2")
         
         # Encode the unlocked PDF to base64
         unlocked_pdf_base64 = base64.b64encode(unlocked_pdf_stream.read()).decode('utf-8')
 
         return jsonify({'pdf': unlocked_pdf_base64})
-        return send_file(unlocked_pdf_stream, as_attachment=True, download_name='unlocked.pdf', mimetype='application/pdf')
 
     except Exception as e:
         print(e)
