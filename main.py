@@ -1,12 +1,23 @@
-from flask import Flask, request, send_file, jsonify
+from flask import Flask, request, send_file, jsonify, send_from_directory
 from flask_cors import CORS
 from PyPDF2 import PdfReader, PdfWriter
 import io
 import base64
+import os
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='front/build')
 CORS(app)  # Enable CORS for all routes
+
+# Serve React App
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(app.static_folder + '/' + path):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
+
 
 @app.route('/unlock-pdf', methods=['POST'])
 def unlock_pdf():
@@ -25,14 +36,13 @@ def unlock_pdf():
         pdf_reader = PdfReader(f)
 
         # Check if the PDF is encrypted
-        if not pdf_reader.is_encrypted:
-            print('PDF is not encrypted')
-            return jsonify({'error': 'PDF is not encrypted'}), 400
+        if pdf_reader.is_encrypted:
+            print('PDF is encrypted. Analyzing password.')
 
-        # Try to decrypt the PDF with the provided password
-        if not pdf_reader.decrypt(password):
-            print('Incorrect password')
-            return jsonify({'error': 'Incorrect password'}), 400
+            # Try to decrypt the PDF with the provided password
+            if not pdf_reader.decrypt(password):
+                print('Incorrect password')
+                return jsonify({'error': 'Incorrect password'}), 400
 
         # Create a new PDF writer object to write the unlocked PDF
         pdf_writer = PdfWriter()

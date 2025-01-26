@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   Box,
   Button,
@@ -11,9 +11,12 @@ import { CloudUpload } from '@mui/icons-material';
 import PasswordIcon from '@mui/icons-material/Password';
 import FileRow from './components/FileRow';
 import PasswordEditor from './components/PasswordEditor';
+import { v4 as uuidv4 } from 'uuid';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
 
-const BASE_URL = "http://localhost:3001";
+const BASE_URL = "http://localhost:3001/";
 
 
 const App = () => {
@@ -27,7 +30,7 @@ const App = () => {
         const base64String = reader.result.split(',')[1];
         setFiles((prevFiles) => [
           ...prevFiles,
-          { name: file.name, original: base64String, status: 'Pending', password: "", unlocked: "" }
+          { name: file.name, uuid: uuidv4(), original: base64String, status: 'Pending', password: "", unlocked: "" }
         ]);
       };
       reader.readAsDataURL(file);
@@ -101,6 +104,32 @@ const App = () => {
     }
   };
 
+  const handleDownloadAll = useCallback(() => {
+    const zipFile = new JSZip();
+    let i = 0;
+    // console.info("ENTRÓ");
+    // console.info(files);
+    while( i < files.length ) {
+      const file = files[i];
+      console.log(`Iterating over ${file.name}`);
+      console.log(file.unlocked != "");
+      if (file.unlocked) {
+        const buffer = new ArrayBuffer(file.unlocked.length);
+        const view = new Uint8Array(buffer);
+        for (var k = 0; k < file.unlocked.length; k++) {
+          view[k] = file.unlocked.charCodeAt(k);
+        }
+        // console.info(`Va a guardar ${file.uuid}`);
+        zipFile.file(`${file.name}-${file.uuid}.pdf`, buffer);
+      }
+
+      i++;
+    }
+
+    zipFile.generateAsync({ type: 'blob' }).then((zipBlob) => saveAs(zipBlob, 'unlocked.zip'));
+  }, [files]);
+
+
   return (
     <>
       <Box
@@ -150,11 +179,22 @@ const App = () => {
                 startIcon={<CloudUpload />}
                 disabled={!files?.length}
                 onClick={() => files.forEach((file, index) => {
-                  if (file.status == "Pending")
+                  if (file.status != "Unlocked")
                     handleUnlock(index);
                 })}
               >
                 Unlock pending
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                variant="contained"
+                component="label"
+                startIcon={<CloudUpload />}
+                disabled={!files?.length}
+                onClick={() => handleDownloadAll()}
+              >
+                Download all
               </Button>
             </Grid>
             <Grid item>
@@ -238,6 +278,7 @@ const App = () => {
               password={file.password}
               handlePasswordChange={(event) => handleChangeFileProperty(index, "password", event.target.value)}
               handleUnlock={() => handleUnlock(index)}
+              uuid={file.uuid}
             />
           ))}
         </Grid>

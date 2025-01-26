@@ -9,8 +9,7 @@ import {
 import { LockOpen } from '@mui/icons-material';
 import DownloadIcon from '@mui/icons-material/Download';
 
-
-const FileRow = ({ key, filename, status, password, unlocked, handlePasswordChange, handleUnlock }) => {
+const FileRow = ({ key, filename, status, password, unlocked, handlePasswordChange, handleUnlock, uuid }) => {
     return (
         <Grid
             key={key}
@@ -70,7 +69,7 @@ const FileRow = ({ key, filename, status, password, unlocked, handlePasswordChan
                 <IconButton
                     aria-label="unlock"
                     color="primary"
-                    disabled={!password || unlocked}
+                    disabled={unlocked}
                     onClick={() => handleUnlock(key)}
                 >
                     <LockOpen />
@@ -91,7 +90,7 @@ const FileRow = ({ key, filename, status, password, unlocked, handlePasswordChan
                         const url = window.URL.createObjectURL(blob);
                         const link = document.createElement('a');
                         link.href = url;
-                        link.setAttribute('download', filename);
+                        link.setAttribute('download', `${filename}-${uuid}.pdf`);
                         document.body.appendChild(link);
                         link.click();
                         link.remove();
